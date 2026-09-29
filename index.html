@@ -4,12 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f2eee5" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta
       name="description"
       content="An interactive educational reconstruction of visual pattern completion and backward masking."
     />
     <title>What Did You See?</title>
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to the experience</a>
@@ -75,8 +78,8 @@
           <canvas id="stimulusCanvas" width="720" height="480" aria-label="Visual stimulus"></canvas>
           <div class="fixation" id="fixation" aria-hidden="true">+</div>
           <div class="ready-panel" id="readyPanel">
-            <p>First, six trials will calibrate the task to your display and performance.</p>
-            <p class="ready-detail">Keep this tab visible. Every trial uses a new object, and the four choices come from the same visual family. Exposure time and occlusion adapt until recognition is difficult—but possible.</p>
+            <p>Two phases, then your result.</p>
+            <p class="ready-detail"><b>1 · Calibration:</b> six trials tune exposure and occlusion to your display and performance.<br /><b>2 · Measurement:</b> eighteen new objects compare a blank screen with a backward mask. The short message halfway through is only a breathing point—not a third condition.</p>
             <button class="primary-button" id="readyButton" type="button">I’m ready</button>
           </div>
           <div class="response-panel" id="responsePanel" aria-labelledby="responsePrompt" hidden>
@@ -114,7 +117,7 @@
             <span>correct</span>
           </article>
           <article class="metric-card">
-            <p>Your masking cost</p>
+            <p>Masking cost (Blank − Mask)</p>
             <strong id="maskCost">—</strong>
             <span>percentage points</span>
           </article>
@@ -131,6 +134,11 @@
             <div class="bar-track"><span class="result-bar orange" id="maskBar"></span></div>
             <b id="maskBarLabel">0%</b>
           </div>
+        </div>
+
+        <div class="result-explainer" aria-live="polite">
+          <p class="eyebrow">How to read this</p>
+          <p id="resultExplanation"></p>
         </div>
 
         <div class="results-actions">
@@ -331,6 +339,6 @@
     </dialog>
 
     <noscript>This interactive experiment requires JavaScript.</noscript>
-    <script type="module" src="app.js?v=4"></script>
+    <script type="module" src="app.js?v=5"></script>
   </body>
 </html>

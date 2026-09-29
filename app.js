@@ -339,7 +339,7 @@ async function submitResponse(answer) {
     $("#trialCurrent").textContent = "1";
     $("#trialTotal").textContent = "18";
     $("#trialProgress").style.width = "0";
-    await showInterstitial("Calibrated. Now the measured experiment begins.", 1300);
+    await showInterstitial("Phase 1 complete · Timing is fixed. Phase 2: eighteen measured trials.", 1600);
   } else if (state.index < 6) {
     $("#trialCurrent").textContent = state.index + 1;
     $("#trialProgress").style.width = `${(state.index / 6) * 100}%`;
@@ -349,7 +349,7 @@ async function submitResponse(answer) {
     $("#trialProgress").style.width = `${(measuredIndex / 18) * 100}%`;
   }
   if (state.index === 15) {
-    await showInterstitial("The object is gone. Your visual system is not finished.", 1100);
+    await showInterstitial("Halfway through Phase 2 · Keep trusting your first impression.", 1200);
   }
   runTrial();
 }
@@ -368,6 +368,11 @@ function summarize(condition) {
 }
 
 function showResults() {
+  const measured = state.responses.filter((response) => !response.calibration);
+  const blankTrials = measured.filter((response) => !response.masked);
+  const maskTrials = measured.filter((response) => response.masked);
+  const blankCorrect = blankTrials.filter((response) => response.correct).length;
+  const maskCorrect = maskTrials.filter((response) => response.correct).length;
   const blank = summarize((response) => !response.masked);
   const mask = summarize((response) => response.masked);
   const cost = blank - mask;
@@ -384,6 +389,11 @@ function showResults() {
       : cost < -5
         ? `Your short run did not show a masking cost. Individual demonstrations are noisy—and that is part of the scientific lesson.`
         : `Your masked and unmasked scores were similar in this short run. A personal demonstration is not a group experiment.`;
+  $("#resultExplanation").textContent = cost > 0
+    ? `You identified ${blankCorrect} of ${blankTrials.length} objects after a blank screen and ${maskCorrect} of ${maskTrials.length} after a mask. Blank minus Mask gives +${cost} points: performance dropped after visual noise, which is the predicted masking direction. The sample is still too small for a personal scientific conclusion.`
+    : cost < 0
+      ? `You identified ${blankCorrect} of ${blankTrials.length} objects after a blank screen and ${maskCorrect} of ${maskTrials.length} after a mask. Blank minus Mask gives ${cost} points: the mask condition happened to score higher in this run. That does not mean the mask improved perception; with only ${maskTrials.length} different objects per condition, random item difficulty and guessing can easily reverse the score.`
+      : `You identified ${blankCorrect} of ${blankTrials.length} objects after a blank screen and ${maskCorrect} of ${maskTrials.length} after a mask. Blank minus Mask is 0: this short run did not separate the conditions. It is a demonstration, not enough data for a personal conclusion.`;
   $("#slidePersonalResult").textContent = cost > 5
     ? `In your run, accuracy was ${blank}% without a mask and ${mask}% with one—a ${cost}-point difference.`
       : `Your run produced ${blank}% accuracy without a mask and ${mask}% with one. One participant is an experience, not a conclusion.`;
