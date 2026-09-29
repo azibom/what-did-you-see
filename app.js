@@ -359,6 +359,11 @@ $("#startButton").addEventListener("click", startExperiment);
 $("#readyButton").addEventListener("click", beginTrials);
 $("#retryButton").addEventListener("click", startExperiment);
 $("#enterStoryButton").addEventListener("click", enterStory);
+$("#presentationLink").addEventListener("click", (event) => {
+  event.preventDefault();
+  state.slide = 0;
+  enterStory();
+});
 $("#exitExperiment").addEventListener("click", () => switchScreen("intro"));
 $("#previousSlide").addEventListener("click", () => showSlide(state.slide - 1));
 $("#nextSlide").addEventListener("click", () => showSlide(state.slide + 1));

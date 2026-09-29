@@ -50,6 +50,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .topbar-rule { width: 32px; height: 1px; background: var(--line); }
 .text-button, .quiet-button { border: 0; background: none; cursor: pointer; padding: .5rem; color: var(--muted); }
 .text-button:hover, .quiet-button:hover { color: var(--ink); }
+.presentation-link { text-decoration: none; }
 
 .screen { display: none; min-height: 100vh; padding: 112px clamp(1.2rem, 6vw, 6.5rem) 48px; }
 .screen.is-active { display: grid; animation: screen-in .65s var(--ease) both; }
