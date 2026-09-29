@@ -9,7 +9,7 @@
       content="An interactive educational reconstruction of visual pattern completion and backward masking."
     />
     <title>What Did You See?</title>
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="styles.css?v=4" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to the experience</a>
@@ -33,8 +33,8 @@
           <p class="eyebrow">A three-minute experiment in seeing</p>
           <h1 id="introTitle">Your eyes receive fragments.<br />What does your mind add?</h1>
           <p class="lede">
-            You will see incomplete objects for a fraction of a second. Choose what you saw.
-            Do not overthink it.
+            You will see a different incomplete object on every trial, for only a fraction of a second.
+            Choose the first impression—no object is repeated.
           </p>
           <div class="intro-actions">
             <button class="primary-button" id="startButton" type="button">
@@ -76,7 +76,7 @@
           <div class="fixation" id="fixation" aria-hidden="true">+</div>
           <div class="ready-panel" id="readyPanel">
             <p>First, six trials will calibrate the task to your display and performance.</p>
-            <p class="ready-detail">Keep this tab visible. Exposure time and occlusion will adapt until recognition is difficult—but possible.</p>
+            <p class="ready-detail">Keep this tab visible. Every trial uses a new object, and the four choices come from the same visual family. Exposure time and occlusion adapt until recognition is difficult—but possible.</p>
             <button class="primary-button" id="readyButton" type="button">I’m ready</button>
           </div>
           <div class="response-panel" id="responsePanel" aria-labelledby="responsePrompt" hidden>
@@ -331,6 +331,6 @@
     </dialog>
 
     <noscript>This interactive experiment requires JavaScript.</noscript>
-    <script type="module" src="app.js?v=3"></script>
+    <script type="module" src="app.js?v=4"></script>
   </body>
 </html>

@@ -19,8 +19,8 @@ Browser presentation timing depends on the display refresh rate, operating syste
 
 ## Experience structure
 
-1. **Calibration** — six masked trials adapt exposure duration and occlusion to the visitor's display and performance.
-2. **Experiment** — 18 randomized masked/unmasked trials using the calibrated difficulty.
+1. **Calibration** — six unique masked stimuli adapt exposure duration and occlusion to the visitor's display and performance.
+2. **Experiment** — 18 additional masked/unmasked stimuli. Every target category appears only once per run, and answer choices are drawn from the same semantic family.
 3. **Personal result** — masked and unmasked accuracy plus an individual masking-cost estimate.
 4. **Paper story** — ten slides moving from first-person experience to hypothesis, design, result, interpretation, and limitations.
 
