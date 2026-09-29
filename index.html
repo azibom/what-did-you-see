@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f2eee5" />
+    <meta
+      name="description"
+      content="An interactive educational reconstruction of visual pattern completion and backward masking."
+    />
+    <title>What Did You See?</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the experience</a>
+
+    <header class="topbar" aria-label="Site header">
+      <a class="wordmark" href="#" aria-label="What Did You See? home">
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        What Did You See?
+      </a>
+      <div class="topbar-meta">
+        <span id="phaseLabel">Field experiment</span>
+        <span class="topbar-rule" aria-hidden="true"></span>
+        <button class="text-button" id="aboutButton" type="button">About</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="screen intro-screen is-active" id="introScreen" aria-labelledby="introTitle">
+        <div class="intro-copy">
+          <p class="eyebrow">A three-minute experiment in seeing</p>
+          <h1 id="introTitle">Your eyes receive fragments.<br />What does your mind add?</h1>
+          <p class="lede">
+            You will see incomplete objects for a fraction of a second. Choose what you saw.
+            Do not overthink it.
+          </p>
+          <div class="intro-actions">
+            <button class="primary-button" id="startButton" type="button">
+              Begin experiment <span aria-hidden="true">→</span>
+            </button>
+            <span class="duration-note">24 trials · about 3 minutes</span>
+          </div>
+        </div>
+
+        <div class="intro-object" aria-hidden="true">
+          <svg viewBox="0 0 420 420" role="presentation">
+            <g class="intro-rings">
+              <circle cx="210" cy="210" r="150" />
+              <circle cx="210" cy="210" r="92" />
+              <circle cx="210" cy="210" r="36" />
+            </g>
+            <path class="intro-eye" d="M67 211c35-55 82-83 143-83s108 28 143 83c-35 55-82 83-143 83S102 266 67 211Z" />
+            <circle class="intro-pupil" cx="210" cy="211" r="39" />
+            <rect class="intro-cut intro-cut-a" x="196" y="80" width="52" height="260" />
+            <rect class="intro-cut intro-cut-b" x="92" y="191" width="238" height="42" />
+          </svg>
+          <p>Not a snapshot.</p>
+        </div>
+      </section>
+
+      <section class="screen experiment-screen" id="experimentScreen" aria-labelledby="experimentTitle">
+        <div class="experiment-header">
+          <div>
+            <p class="eyebrow" id="experimentPhase">Before you begin</p>
+            <h2 id="experimentTitle">Stay centered. Trust the first impression.</h2>
+          </div>
+          <div class="trial-count" aria-live="polite">
+            <span id="trialCurrent">0</span><span>/</span><span id="trialTotal">24</span>
+          </div>
+        </div>
+
+        <div class="experiment-stage" id="experimentStage">
+          <canvas id="stimulusCanvas" width="720" height="480" aria-label="Visual stimulus"></canvas>
+          <div class="fixation" id="fixation" aria-hidden="true">+</div>
+          <div class="ready-panel" id="readyPanel">
+            <p>Use a laptop or desktop. Keep this tab visible.</p>
+            <p class="ready-detail">The experiment uses your display refresh cycle; measured presentation times are recorded locally.</p>
+            <button class="primary-button" id="readyButton" type="button">I’m ready</button>
+          </div>
+          <div class="response-panel" id="responsePanel" aria-labelledby="responsePrompt" hidden>
+            <p id="responsePrompt">What did you see?</p>
+            <div class="answer-grid" id="answerGrid"></div>
+            <p class="keyboard-hint">Press 1–4 or choose an answer</p>
+          </div>
+          <div class="interstitial" id="interstitial" hidden>
+            <p id="interstitialText"></p>
+          </div>
+        </div>
+
+        <div class="experiment-footer">
+          <div class="trial-progress" aria-hidden="true"><span id="trialProgress"></span></div>
+          <button class="quiet-button" id="exitExperiment" type="button">Exit experiment</button>
+        </div>
+      </section>
+
+      <section class="screen results-screen" id="resultsScreen" aria-labelledby="resultsTitle">
+        <div class="results-heading">
+          <p class="eyebrow">Your result</p>
+          <h2 id="resultsTitle">The image ended.<br />The seeing did not.</h2>
+          <p id="resultNarrative" class="lede"></p>
+        </div>
+
+        <div class="results-grid">
+          <article class="metric-card">
+            <p>Mask absent</p>
+            <strong id="blankScore">—</strong>
+            <span>correct</span>
+          </article>
+          <article class="metric-card accent-card">
+            <p>Mask present</p>
+            <strong id="maskScore">—</strong>
+            <span>correct</span>
+          </article>
+          <article class="metric-card">
+            <p>Your masking cost</p>
+            <strong id="maskCost">—</strong>
+            <span>percentage points</span>
+          </article>
+        </div>
+
+        <div class="result-figure" aria-label="Your masked and unmasked accuracy">
+          <div class="bar-row">
+            <span>Blank</span>
+            <div class="bar-track"><span class="result-bar" id="blankBar"></span></div>
+            <b id="blankBarLabel">0%</b>
+          </div>
+          <div class="bar-row">
+            <span>Mask</span>
+            <div class="bar-track"><span class="result-bar orange" id="maskBar"></span></div>
+            <b id="maskBarLabel">0%</b>
+          </div>
+        </div>
+
+        <div class="results-actions">
+          <button class="primary-button" id="enterStoryButton" type="button">
+            Now explain what happened <span aria-hidden="true">→</span>
+          </button>
+          <button class="quiet-button" id="retryButton" type="button">Run again</button>
+        </div>
+        <p class="microcopy">A classroom demonstration, not a diagnostic test. Your responses never leave this browser.</p>
+      </section>
+
+      <section class="deck" id="deck" aria-label="Paper presentation" hidden>
+        <div class="deck-progress" aria-hidden="true"><span id="deckProgress"></span></div>
+
+        <article class="slide is-current" data-slide="0" data-label="Your experience">
+          <div class="slide-number">01</div>
+          <div class="slide-copy narrow">
+            <p class="eyebrow">Start with the evidence closest to you</p>
+            <h2>You just watched your own perception run out of time.</h2>
+            <p class="slide-lede" id="slidePersonalResult"></p>
+            <aside class="hover-note" tabindex="0">
+              <span>What can this result prove?</span>
+              <div class="hover-card">Very little by itself. A short personal run is an experience, not statistical evidence. It gives us the question—not the answer.</div>
+            </aside>
+          </div>
+          <div class="slide-visual personal-orbit" aria-hidden="true">
+            <div class="orbit orbit-a"><span>stimulus</span></div>
+            <div class="orbit orbit-b"><span>mask</span></div>
+            <div class="orbit-center">?</div>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="1" data-label="The puzzle">
+          <div class="slide-number">02</div>
+          <div class="slide-copy">
+            <p class="eyebrow">The puzzle</p>
+            <h2>Seeing is not the same as receiving an image.</h2>
+            <p class="slide-lede">The retinal input can be sparse, interrupted, or ambiguous—and yet a stable object appears in experience.</p>
+            <div class="equation-line" aria-label="Visible fragments plus recurrent completion can lead to object recognition">
+              <span>visible fragments</span><b>+</b><span>completion over time</span><b>→</b><span>recognized object</span>
+            </div>
+          </div>
+          <div class="slide-visual completion-demo" aria-hidden="true">
+            <canvas id="completionCanvas" width="640" height="420"></canvas>
+            <div class="completion-scan"></div>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="2" data-label="Two passes">
+          <div class="slide-number">03</div>
+          <div class="slide-copy compact">
+            <p class="eyebrow">A useful model</p>
+            <h2>One pass extracts clues.<br />Later passes refine them.</h2>
+            <p class="slide-lede">Feedforward signals carry partial visual information upward. Recurrent signals return to refine, bind, and complete the representation.</p>
+            <aside class="hover-note" tabindex="0">
+              <span>Does recurrence equal consciousness?</span>
+              <div class="hover-card">No. Recurrence supports many computations. The paper tests a perceptual consequence that is consistent with recurrent processing.</div>
+            </aside>
+          </div>
+          <div class="slide-visual network-visual" aria-label="Animated feedforward and recurrent processing diagram">
+            <svg viewBox="0 0 660 440" role="img">
+              <path class="network-path forward-path" d="M105 350 C180 300 175 245 260 220 S355 140 430 125 S530 82 570 60" />
+              <path class="network-path return-path" d="M568 88 C505 145 478 182 407 206 S315 282 242 296 S145 337 110 375" />
+              <g class="node" transform="translate(105 362)"><circle r="34"/><text y="58">retina</text></g>
+              <g class="node" transform="translate(260 230)"><circle r="42"/><text y="68">features</text></g>
+              <g class="node" transform="translate(430 135)"><circle r="49"/><text y="78">shape</text></g>
+              <g class="node node-accent" transform="translate(570 70)"><circle r="58"/><text y="90">object</text></g>
+              <circle class="signal signal-forward" r="9"><animateMotion dur="2.1s" repeatCount="indefinite" path="M105 350 C180 300 175 245 260 220 S355 140 430 125 S530 82 570 60"/></circle>
+              <circle class="signal signal-return" r="8"><animateMotion dur="2.4s" begin="1.1s" repeatCount="indefinite" path="M568 88 C505 145 478 182 407 206 S315 282 242 296 S145 337 110 375"/></circle>
+            </svg>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="3" data-label="Aphantasia">
+          <div class="slide-number">04</div>
+          <div class="slide-copy narrow">
+            <p class="eyebrow">Why aphantasia?</p>
+            <h2>Imagery and perception may borrow some of the same returning pathways.</h2>
+            <p class="slide-lede">Aphantasia is the reported absence of voluntary visual imagery. The authors asked whether its differences extend beyond imagery into perceptual completion.</p>
+            <aside class="hover-note" tabindex="0">
+              <span>A difference—not a deficit</span>
+              <div class="hover-card">The study does not claim that people with aphantasia are less conscious, less creative, or generally worse at seeing.</div>
+            </aside>
+          </div>
+          <div class="slide-visual mind-eye" aria-hidden="true">
+            <div class="head-outline"><div class="imagined-object"></div></div>
+            <div class="imagery-scale"><span>absent</span><i></i><span>vivid</span></div>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="4" data-label="The intervention">
+          <div class="slide-number">05</div>
+          <div class="slide-copy compact">
+            <p class="eyebrow">The intervention</p>
+            <h2>A mask does not erase the past.<br />It interrupts what comes next.</h2>
+            <p class="slide-lede">A noise mask arrives before the partial representation has time to stabilize. New feedforward input collides with the ongoing recurrent cycle.</p>
+          </div>
+          <div class="slide-visual timeline" aria-label="Animated backward masking timeline">
+            <div class="timeline-track"></div>
+            <div class="timeline-event target-event"><strong>25–150 ms</strong><span>partial object</span></div>
+            <div class="timeline-event mask-event"><strong>mask</strong><span>new input</span></div>
+            <div class="timeline-event response-event"><strong>response</strong><span>category choice</span></div>
+            <div class="timeline-playhead"></div>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="5" data-label="The experiment">
+          <div class="slide-number">06</div>
+          <div class="slide-copy">
+            <p class="eyebrow">Loo & Buchsbaum, 2026</p>
+            <h2>A simple design with a sharp comparison.</h2>
+            <p class="slide-lede">Participants categorized briefly presented, partially occluded objects. A noise mask or blank screen followed each target.</p>
+          </div>
+          <div class="slide-visual study-design">
+            <div class="participant-count"><strong>31</strong><span>self-identified<br />aphantasic participants</span></div>
+            <div class="versus">vs</div>
+            <div class="participant-count"><strong>41</strong><span>control<br />participants</span></div>
+            <div class="design-branch"><span>mask</span><span>blank</span><span>occluded</span><span>intact</span></div>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="6" data-label="The result">
+          <div class="slide-number">07</div>
+          <div class="slide-copy compact">
+            <p class="eyebrow">The focal result</p>
+            <h2>The mask removed more of the advantage in the aphantasia group.</h2>
+            <p class="slide-lede">At the focal 25 ms condition, the reported masking cost was approximately twice as large.</p>
+            <aside class="hover-note" tabindex="0">
+              <span>Masking cost</span>
+              <div class="hover-card">Accuracy without a mask minus accuracy with a mask, calculated within each participant.</div>
+            </aside>
+          </div>
+          <div class="slide-visual paper-bars" aria-label="Reported masking cost: 19 percentage points for the aphantasia group and 10 for controls">
+            <div class="paper-bar-group"><div class="paper-bar aphantasia-bar"><b>19</b></div><span>Aphantasia</span></div>
+            <div class="paper-bar-group"><div class="paper-bar control-bar"><b>10</b></div><span>Control</span></div>
+            <p>percentage-point loss at 25 ms</p>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="7" data-label="Interpretation">
+          <div class="slide-number">08</div>
+          <div class="slide-copy narrow">
+            <p class="eyebrow">The interpretation</p>
+            <h2>Preserved—but easier to disrupt.</h2>
+            <p class="slide-lede">The authors interpret the pattern as consistent with recurrent completion in aphantasia being present, yet more fragile under rapid visual interference.</p>
+            <div class="claim-scale">
+              <span>data</span><i></i><span>interpretation</span><i></i><span>mechanism</span>
+            </div>
+          </div>
+          <div class="slide-visual fragile-loop" aria-hidden="true">
+            <svg viewBox="0 0 540 420"><path d="M112 213c0-92 69-151 154-151 90 0 166 68 166 157 0 81-62 143-137 143-71 0-124-49-124-110 0-57 44-96 94-96 47 0 82 31 82 73"/><circle cx="347" cy="230" r="15"/><path class="break" d="M113 185l-35-34m35 34l-39 22"/></svg>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="8" data-label="Limits">
+          <div class="slide-number">09</div>
+          <div class="slide-copy wide">
+            <p class="eyebrow">Read the result, not the headline</p>
+            <h2>What this study does <em>not</em> establish.</h2>
+            <div class="limits-list">
+              <button type="button"><span>01</span>It does not measure neural recurrence directly.<i>Behavioral masking is an indirect probe; no EEG or neural recording was collected.</i></button>
+              <button type="button"><span>02</span>It does not diagnose aphantasia.<i>The group was self-identified and imagery vividness is not a standalone clinical diagnostic.</i></button>
+              <button type="button"><span>03</span>The timing gradient was not conclusive.<i>The group-by-SOA moderation was not statistically established (p = .140).</i></button>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide" data-slide="9" data-label="The question">
+          <div class="slide-number">10</div>
+          <div class="slide-copy finale-copy">
+            <p class="eyebrow">The question that remains</p>
+            <h2>How much of what you see<br />was never in the image?</h2>
+            <p class="slide-lede">Perception is constrained by the world—but completed over time by a brain that brings its own history, structure, and expectations.</p>
+            <div class="citation-block">
+              <span>Paper</span>
+              <a href="https://doi.org/10.1016/j.concog.2026.104100" target="_blank" rel="noreferrer">Loo & Buchsbaum (2026) · Consciousness and Cognition ↗</a>
+            </div>
+          </div>
+          <div class="slide-visual finale-eye" aria-hidden="true"><div class="finale-pupil"></div></div>
+        </article>
+
+        <nav class="deck-controls" aria-label="Presentation controls">
+          <button id="previousSlide" type="button" aria-label="Previous slide">←</button>
+          <div><span id="currentSlideNumber">1</span><span>/ 10</span><b id="currentSlideLabel">Your experience</b></div>
+          <button id="nextSlide" type="button" aria-label="Next slide">→</button>
+          <button id="fullscreenButton" type="button" aria-label="Enter fullscreen">⛶</button>
+        </nav>
+      </section>
+    </main>
+
+    <dialog id="aboutDialog">
+      <button class="dialog-close" id="closeAbout" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">About this project</p>
+      <h2>An experience first.<br />A paper second.</h2>
+      <p>This is an independent educational reconstruction inspired by the experimental logic of Loo and Buchsbaum (2026). It is not the authors’ official implementation, a clinical test, or a full scientific replication.</p>
+      <p>No responses are transmitted or stored. Timing in a web browser depends on the device and display refresh rate.</p>
+      <a href="https://doi.org/10.1016/j.concog.2026.104100" target="_blank" rel="noreferrer">Read the paper ↗</a>
+    </dialog>
+
+    <noscript>This interactive experiment requires JavaScript.</noscript>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
