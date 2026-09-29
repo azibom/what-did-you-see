@@ -39,7 +39,7 @@
             <button class="primary-button" id="startButton" type="button">
               Begin experiment <span aria-hidden="true">→</span>
             </button>
-            <span class="duration-note">24 trials · about 3 minutes</span>
+            <span class="duration-note">6 calibration + 18 measured trials · about 3 minutes</span>
           </div>
         </div>
 
@@ -74,8 +74,8 @@
           <canvas id="stimulusCanvas" width="720" height="480" aria-label="Visual stimulus"></canvas>
           <div class="fixation" id="fixation" aria-hidden="true">+</div>
           <div class="ready-panel" id="readyPanel">
-            <p>Use a laptop or desktop. Keep this tab visible.</p>
-            <p class="ready-detail">The experiment uses your display refresh cycle; measured presentation times are recorded locally.</p>
+            <p>First, six trials will calibrate the task to your display and performance.</p>
+            <p class="ready-detail">Keep this tab visible. Exposure time and occlusion will adapt until recognition is difficult—but possible.</p>
             <button class="primary-button" id="readyButton" type="button">I’m ready</button>
           </div>
           <div class="response-panel" id="responsePanel" aria-labelledby="responsePrompt" hidden>
@@ -134,11 +134,11 @@
 
         <div class="results-actions">
           <button class="primary-button" id="enterStoryButton" type="button">
-            Now explain what happened <span aria-hidden="true">→</span>
+            Start the 10-slide presentation <span aria-hidden="true">→</span>
           </button>
           <button class="quiet-button" id="retryButton" type="button">Run again</button>
         </div>
-        <p class="microcopy">A classroom demonstration, not a diagnostic test. Your responses never leave this browser.</p>
+        <p class="microcopy" id="difficultySummary">A classroom demonstration, not a diagnostic test. Your responses never leave this browser.</p>
       </section>
 
       <section class="deck" id="deck" aria-label="Paper presentation" hidden>

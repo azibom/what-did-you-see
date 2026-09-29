@@ -120,6 +120,8 @@ h2 { font-size: clamp(2.7rem, 6vw, 6.4rem); line-height: .95; }
 .results-screen .microcopy { grid-column: 1 / -1; }
 
 .deck { min-height: 100vh; background: var(--paper); }
+.deck[hidden] { display: none !important; }
+.deck:not([hidden]) { display: block; }
 .deck-progress { position: fixed; top: 71px; left: 0; right: 0; z-index: 101; height: 3px; }
 .deck-progress span { display: block; width: 10%; height: 100%; background: var(--orange); transition: width .6s var(--ease); }
 .slide { display: none; position: relative; min-height: 100vh; padding: 118px clamp(1.2rem, 6vw, 6.5rem) 95px; grid-template-columns: minmax(0, 1fr) minmax(320px, .8fr); align-items: center; gap: 5vw; overflow: hidden; }

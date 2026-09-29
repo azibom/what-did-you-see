@@ -19,9 +19,10 @@ Browser presentation timing depends on the display refresh rate, operating syste
 
 ## Experience structure
 
-1. **Experiment** — 24 randomized trials crossing mask/blank and occluded/intact conditions at several presentation durations.
-2. **Personal result** — masked and unmasked accuracy plus an individual masking-cost estimate.
-3. **Paper story** — ten slides moving from first-person experience to hypothesis, design, result, interpretation, and limitations.
+1. **Calibration** — six masked trials adapt exposure duration and occlusion to the visitor's display and performance.
+2. **Experiment** — 18 randomized masked/unmasked trials using the calibrated difficulty.
+3. **Personal result** — masked and unmasked accuracy plus an individual masking-cost estimate.
+4. **Paper story** — ten slides moving from first-person experience to hypothesis, design, result, interpretation, and limitations.
 
 All responses remain in memory in the visitor's browser. Nothing is transmitted or stored.
 

@@ -18,10 +18,11 @@ const state = {
   responses: [],
   acceptingResponse: false,
   slide: 0,
+  exposure: 83,
+  occlusion: 0.48,
 };
 
 const objects = ["Fish", "Cup", "Key", "Umbrella", "Plane", "Chair"];
-const durations = [67, 100, 150];
 
 function shuffle(items) {
   const result = [...items];
@@ -40,20 +41,24 @@ function switchScreen(name) {
 }
 
 function buildTrials() {
-  const conditions = [];
-  objects.forEach((object, objectIndex) => {
-    [true, false].forEach((masked) => {
-      [true, false].forEach((occluded) => {
-        conditions.push({
-          object,
-          masked,
-          occluded,
-          duration: durations[(objectIndex + Number(masked) + Number(occluded)) % durations.length],
-        });
-      });
-    });
-  });
-  return shuffle(conditions);
+  const calibration = shuffle(objects).map((object) => ({
+    object,
+    masked: true,
+    occluded: true,
+    calibration: true,
+    seed: Math.random(),
+  }));
+  const measured = [];
+  for (let repetition = 0; repetition < 3; repetition += 1) {
+    objects.forEach((object, objectIndex) => measured.push({
+      object,
+      masked: (objectIndex + repetition) % 2 === 0,
+      occluded: true,
+      calibration: false,
+      seed: Math.random(),
+    }));
+  }
+  return [...calibration, ...shuffle(measured)];
 }
 
 function clearStage(color = "#fbfaf6") {
@@ -62,7 +67,7 @@ function clearStage(color = "#fbfaf6") {
 }
 
 function drawObject(ctx, name, width, height, options = {}) {
-  const { occluded = false, completion = 0 } = options;
+  const { occluded = false, completion = 0, occlusionLevel = 0.48, seed = 0.42 } = options;
   const scale = Math.min(width / 720, height / 480);
   ctx.save();
   ctx.translate(width / 2, height / 2);
@@ -106,14 +111,23 @@ function drawObject(ctx, name, width, height, options = {}) {
     const background = ctx === completionContext ? "#f2eee5" : "#fbfaf6";
     ctx.globalAlpha = 1;
     ctx.fillStyle = background;
-    ctx.strokeStyle = "rgba(23,23,20,.14)";
-    ctx.lineWidth = 2;
-    const blocks = [
-      [-215, -78, 118, 58], [-68, -145, 78, 96], [20, -28, 142, 68], [-125, 80, 118, 72], [155, 55, 75, 85],
-    ];
-    blocks.forEach(([x, y, w, h], index) => {
-      ctx.save(); ctx.translate(x, y); ctx.rotate((index % 2 ? 1 : -1) * .07); ctx.fillRect(0, 0, w, h); ctx.strokeRect(0, 0, w, h); ctx.restore();
-    });
+    let randomState = Math.floor(seed * 2147483647) || 1;
+    const random = () => {
+      randomState = (randomState * 16807) % 2147483647;
+      return (randomState - 1) / 2147483646;
+    };
+    const count = Math.round(6 + occlusionLevel * 8);
+    for (let index = 0; index < count; index += 1) {
+      const x = -275 + random() * 510;
+      const y = -180 + random() * 300;
+      const blockWidth = 48 + random() * (55 + occlusionLevel * 65);
+      const blockHeight = 42 + random() * (45 + occlusionLevel * 85);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((random() - 0.5) * 0.5);
+      ctx.fillRect(0, 0, blockWidth, blockHeight);
+      ctx.restore();
+    }
   }
   ctx.restore();
 }
@@ -159,10 +173,16 @@ async function runTrial() {
   clearStage();
   await wait(450 + Math.random() * 200);
   $("#fixation").style.display = "none";
-  drawObject(context, trial.object, canvas.width, canvas.height, { occluded: trial.occluded });
+  trial.duration = state.exposure;
+  trial.occlusionLevel = state.occlusion;
+  drawObject(context, trial.object, canvas.width, canvas.height, {
+    occluded: trial.occluded,
+    occlusionLevel: trial.occlusionLevel,
+    seed: trial.seed,
+  });
   const measuredDuration = await showForFrames(trial.duration);
   if (trial.masked) drawNoise(); else clearStage();
-  await wait(100);
+  await wait(150);
   clearStage();
   trial.measuredDuration = measuredDuration;
   showResponse(trial);
@@ -191,16 +211,37 @@ async function submitResponse(answer) {
   const trial = state.trials[state.index];
   state.responses.push({ ...trial, answer, correct: answer === trial.object });
   $("#responsePanel").hidden = true;
+  if (trial.calibration) {
+    if (answer === trial.object) {
+      state.exposure = Math.max(33, state.exposure - 17);
+      state.occlusion = Math.min(0.7, state.occlusion + 0.045);
+    } else {
+      state.exposure = Math.min(133, state.exposure + 17);
+      state.occlusion = Math.max(0.38, state.occlusion - 0.03);
+    }
+  }
   state.index += 1;
-  $("#trialProgress").style.width = `${(state.index / state.trials.length) * 100}%`;
   if (state.index >= state.trials.length) {
     await showInterstitial("Calculating what survived the mask…", 850);
     showResults();
     return;
   }
-  $("#trialCurrent").textContent = state.index + 1;
-  if (state.index === 8 || state.index === 16) {
-    await showInterstitial(state.index === 8 ? "The object is gone. Your visual system is not finished." : "One final set. Keep trusting the first impression.", 1100);
+  if (state.index === 6) {
+    $("#experimentPhase").textContent = "Measured experiment";
+    $("#trialCurrent").textContent = "1";
+    $("#trialTotal").textContent = "18";
+    $("#trialProgress").style.width = "0";
+    await showInterstitial("Calibrated. Now the measured experiment begins.", 1300);
+  } else if (state.index < 6) {
+    $("#trialCurrent").textContent = state.index + 1;
+    $("#trialProgress").style.width = `${(state.index / 6) * 100}%`;
+  } else {
+    const measuredIndex = state.index - 6;
+    $("#trialCurrent").textContent = measuredIndex + 1;
+    $("#trialProgress").style.width = `${(measuredIndex / 18) * 100}%`;
+  }
+  if (state.index === 15) {
+    await showInterstitial("The object is gone. Your visual system is not finished.", 1100);
   }
   runTrial();
 }
@@ -213,7 +254,7 @@ async function showInterstitial(message, duration) {
 }
 
 function summarize(condition) {
-  const subset = state.responses.filter(condition);
+  const subset = state.responses.filter((response) => !response.calibration && condition(response));
   if (!subset.length) return 0;
   return Math.round((subset.filter((response) => response.correct).length / subset.length) * 100);
 }
@@ -227,14 +268,18 @@ function showResults() {
   $("#maskCost").textContent = `${cost > 0 ? "+" : ""}${cost}`;
   $("#blankBarLabel").textContent = `${blank}%`;
   $("#maskBarLabel").textContent = `${mask}%`;
-  $("#resultNarrative").textContent = cost > 5
-    ? `Your accuracy fell by ${cost} percentage points when visual noise followed the object.`
-    : cost < -5
-      ? `Your short run did not show a masking cost. Individual demonstrations are noisy—and that is part of the scientific lesson.`
-      : `Your masked and unmasked scores were similar in this short run. A personal demonstration is not a group experiment.`;
+  const ceiling = blank >= 95 && mask >= 95;
+  $("#resultNarrative").textContent = ceiling
+    ? "This run reached the ceiling even after calibration. That is a task limitation—not evidence that masking has no effect."
+    : cost > 5
+      ? `Your accuracy fell by ${cost} percentage points when visual noise followed the object.`
+      : cost < -5
+        ? `Your short run did not show a masking cost. Individual demonstrations are noisy—and that is part of the scientific lesson.`
+        : `Your masked and unmasked scores were similar in this short run. A personal demonstration is not a group experiment.`;
   $("#slidePersonalResult").textContent = cost > 5
     ? `In your run, accuracy was ${blank}% without a mask and ${mask}% with one—a ${cost}-point difference.`
-    : `Your run produced ${blank}% accuracy without a mask and ${mask}% with one. One participant is an experience, not a conclusion.`;
+      : `Your run produced ${blank}% accuracy without a mask and ${mask}% with one. One participant is an experience, not a conclusion.`;
+  $("#difficultySummary").textContent = `Calibrated exposure: ~${Math.round(state.exposure)} ms · occlusion: ${Math.round(state.occlusion * 100)}% · Responses stayed in this browser.`;
   switchScreen("results");
   requestAnimationFrame(() => {
     $("#blankBar").style.width = `${blank}%`;
@@ -246,8 +291,11 @@ function startExperiment() {
   state.trials = buildTrials();
   state.responses = [];
   state.index = 0;
+  state.exposure = 83;
+  state.occlusion = 0.48;
+  $("#experimentPhase").textContent = "Before you begin";
   $("#trialCurrent").textContent = "0";
-  $("#trialTotal").textContent = state.trials.length;
+  $("#trialTotal").textContent = "6";
   $("#trialProgress").style.width = "0";
   $("#readyPanel").hidden = false;
   $("#responsePanel").hidden = true;
@@ -257,7 +305,7 @@ function startExperiment() {
 
 function beginTrials() {
   $("#readyPanel").hidden = true;
-  $("#experimentPhase").textContent = "Live experiment";
+  $("#experimentPhase").textContent = "Calibration";
   $("#trialCurrent").textContent = "1";
   runTrial();
 }
@@ -287,7 +335,12 @@ function showSlide(index) {
 }
 
 function enterStory() {
+  if (!state.responses.length) {
+    $("#slidePersonalResult").textContent = "This presentation usually begins with a visitor’s own masked and unmasked result. Start the experiment to generate yours.";
+  }
   switchScreen("deck");
+  window.history.replaceState(null, "", "#presentation");
+  window.scrollTo(0, 0);
   showSlide(0);
 }
 
@@ -313,8 +366,14 @@ $("#fullscreenButton").addEventListener("click", () => document.fullscreenElemen
 $("#aboutButton").addEventListener("click", () => $("#aboutDialog").showModal());
 $("#closeAbout").addEventListener("click", () => $("#aboutDialog").close());
 $("#aboutDialog").addEventListener("click", (event) => { if (event.target === $("#aboutDialog")) $("#aboutDialog").close(); });
+$(".wordmark").addEventListener("click", (event) => {
+  event.preventDefault();
+  window.history.replaceState(null, "", window.location.pathname);
+  switchScreen("intro");
+});
 document.addEventListener("keydown", handleKeydown);
 
 clearStage();
 drawCompletionFrame();
 requestAnimationFrame(animateCompletion);
+if (window.location.hash === "#presentation") enterStory();
